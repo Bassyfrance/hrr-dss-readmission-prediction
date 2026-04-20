@@ -77,22 +77,22 @@ shows the first 5 rows of each file
 
 # STEP 1: LOAD THE DATASET
 
+import streamlit as st
 import pandas as pd
 
-# Load the main hospital dataset
-df = pd.read_csv("diabetic_data.csv")
+@st.cache_data
+def load_data():
+    df = pd.read_csv("diabetic_data.csv")
+    mapping_df = pd.read_csv("IDS_mapping.csv")
+    return df, mapping_df
 
-# Load the mapping dataset
-mapping_df = pd.read_csv("IDS_mapping.csv")
+df, mapping_df = load_data()
 
-# Display first 5 rows of each dataset
-print("Main Dataset Preview:")
-print(df.head())
+st.write("Main Dataset Preview:")
+st.write(df.head())
 
-print("\n" + "="*80 + "\n")
-
-print("Mapping Dataset Preview:")
-print(mapping_df.head())
+st.write("Mapping Dataset Preview:")
+st.write(mapping_df.head())
 
 # ============================================================
 # STEP 2: DATA INSPECTION
