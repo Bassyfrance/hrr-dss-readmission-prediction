@@ -64,6 +64,10 @@ st.markdown(
 st.markdown('<div class="main-title">Hospital Readmission Risk Decision Support System (HRR-DSS)</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-title">An Intelligent Clinical Dashboard for Predicting Early Readmission and Supporting Discharge Decisions</div>', unsafe_allow_html=True)
 
+import streamlit as st
+import pandas as pd
+import numpy as np
+
 # ------------------------------------------------------------
 # LOAD DATA
 # ------------------------------------------------------------
@@ -85,7 +89,7 @@ def load_data():
     if "gender" in df.columns:
         df = df[df["gender"] != "Unknown/Invalid"]
 
-    # Convert age to numeric
+    # Convert age to numeric safely
     age_map = {
         "[0-10)": 5,
         "[10-20)": 15,
@@ -98,19 +102,24 @@ def load_data():
         "[80-90)": 85,
         "[90-100)": 95
     }
-    if df["age"].dtype == object:
-        df["age"] = df["age"].map(age_map)
 
-    # Create binary target
-    df["readmitted_binary"] = df["readmitted"].apply(lambda x: 1 if x == "<30" else 0)
+    if "age" in df.columns:
+        if df["age"].dtype == object:
+            df["age"] = df["age"].map(age_map)
+        df["age"] = pd.to_numeric(df["age"], errors="coerce")
 
-    # Age band
-    df["age_band"] = pd.cut(
-        df["age"],
-        bins=[0, 20, 40, 60, 80, 100],
-        labels=["0-20", "21-40", "41-60", "61-80", "81-100"],
-        include_lowest=True
-    )
+    # Create binary target safely
+    if "readmitted" in df.columns:
+        df["readmitted_binary"] = df["readmitted"].apply(lambda x: 1 if x == "<30" else 0)
+
+    # Age band safely
+    if "age" in df.columns:
+        df["age_band"] = pd.cut(
+            df["age"],
+            bins=[0, 20, 40, 60, 80, 100],
+            labels=["0-20", "21-40", "41-60", "61-80", "81-100"],
+            include_lowest=True
+        )
 
     return df
 
